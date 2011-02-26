@@ -1,0 +1,103 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Project info. -->
+  <groupId>com.carrotsearch</groupId>
+  <artifactId>retrotranslator-test</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>retrotranslator-test</name>
+
+  <!-- Global properties. -->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+  </properties>
+
+  <!-- Build tuning. -->
+  <build>
+    <defaultGoal>install</defaultGoal>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.6</version>
+          <inherited>false</inherited>
+
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.ant</groupId>
+              <artifactId>ant-nodeps</artifactId>
+              <version>1.8.0</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.ant</groupId>
+              <artifactId>ant-trax</artifactId>
+              <version>1.8.0</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.ant</groupId>
+              <artifactId>ant-junit</artifactId>
+              <version>1.8.0</version>
+            </dependency>
+            <dependency>
+              <groupId>net.sf.retrotranslator</groupId>
+              <artifactId>retrotranslator-transformer</artifactId>
+              <version>1.2.9</version>
+            </dependency>
+            <dependency>
+              <groupId>net.sf.retrotranslator</groupId>
+              <artifactId>retrotranslator-runtime</artifactId>
+              <version>1.2.9</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <id>backport-jdk15</id>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                <taskdef name="retrotranslator"
+                  classname="net.sf.retrotranslator.transformer.RetrotranslatorTask"
+                  classpathref="maven.plugin.classpath" />
+
+                <retrotranslator target="1.5"
+                  verbose="true" 
+                  embed="_backport"
+                  failonwarning="true"
+                  destjar="${project.build.directory}/${project.build.finalName}-jdk15.jar">
+                  <jarfileset dir="${project.build.directory}" includes="${project.build.finalName}.jar" />
+                  <classpath>
+                    <pathelement location="${basedir}/src/backport"/>
+                    <!--  Don't know how to do this nicer. -->
+                    <pathelement location="${user.home}/.m2/repository/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar"/>
+                  </classpath>
+                </retrotranslator>
+                
+                <attachartifact file="${project.build.directory}/${project.build.finalName}-jdk15.jar" classifier="jdk15" type="jar"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
