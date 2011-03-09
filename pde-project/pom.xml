@@ -1,0 +1,73 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.carrot2</groupId>
+  <artifactId>example-bundle</artifactId>
+  <packaging>bundle</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Example Bundle</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>1.6.1</version>
+    </dependency> 
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>.</directory>
+        <includes>
+          <include>plugin.xml</include>
+        </includes>
+      </resource>
+    </resources>
+        
+    <plugins>
+      <plugin>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <configuration>
+          <pde>true</pde>
+        </configuration>
+      </plugin>
+              
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <manifestLocation>META-INF</manifestLocation>
+          <instructions>
+            <Bundle-SymbolicName>${pom.artifactId};singleton:=true</Bundle-SymbolicName>
+            <Bundle-Version>${pom.version}</Bundle-Version>
+
+            <Embed-Dependency>*;scope=compile;inline=false</Embed-Dependency>
+            <Embed-Directory>dependency</Embed-Directory>
+            <Embed-StripGroup>true</Embed-StripGroup>            
+            
+            <Import-Package>!com.sun.*, !javax.*, *</Import-Package>
+            
+            <Require-Bundle>org.carrot2.workbench.core</Require-Bundle>
+          </instructions>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
