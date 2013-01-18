@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.3.1-beta.js"></script>
+    <script src="Slice.js"></script>    
+    <script>
+      function update(layer, frame) {
+        var shapes = layer.getChildren();
+
+        for(var n = 0; n < shapes.length; n++) {
+          var shape = shapes[n];
+
+          var angularSpeed = shape.attrs.rotationSpeed;
+          var angularDiff = angularSpeed * 2 * Math.PI * frame.timeDiff / 1000;
+
+          shape.attrs.rotation += angularDiff;
+        }
+      }
+      var stage = new Kinetic.Stage({
+        container: 'container',
+        width: 800,
+        height: 800
+      });
+      /*
+       * setting the listening property to false will improve
+       * drawing performance because the rectangles won't have to be
+       * drawn onto the buffer context
+       */
+      var layer = new Kinetic.Layer({
+        listening: false
+      });
+      var colors = [
+        'rgba(255,255,255,.5)', 
+        'rgba(255,255,0,.5)', 
+        'rgba(255,126,255,.5)', 
+        'rgba(255,50,30,.5)', 
+        'rgba(10,80,255,.5)'
+      ];
+      var colorIndex = 0;
+
+      for(var n = 0; n < 100; n++) {( function() {
+          var i = n;
+          var color = colors[colorIndex++];
+          if(colorIndex >= colors.length) {
+            colorIndex = 0;
+          }
+
+          var radiusFrom = 50 + Math.random() * 500;
+          var radiusTo = radiusFrom + 5 + Math.random() * 100;
+          var angleFrom = Math.random() * 2 * Math.PI;
+          var angleTo = Math.random() * 2 * Math.PI;
+          var randX = stage.getWidth() / 2;
+          var randY = stage.getHeight() / 2;
+
+          var box = new Kinetic.Slice({
+            x: randX,
+            y: randY,
+            offset: {
+              x: 0,
+              y: 0
+            },
+            fill: color,
+            stroke: 'black',
+            strokeWidth: 4,
+
+            radiusFrom: radiusFrom,
+            radiusTo: radiusTo,
+            angleFrom: angleFrom,
+            angleTo: angleTo,
+            
+            rotationSpeed: Math.random() * 5 / (Math.PI * 2)
+          });
+
+          layer.add(box);
+        }());
+      }
+
+      stage.add(layer);
+
+      var anim = new Kinetic.Animation(function(frame) {
+        update(layer, frame);
+      }, layer);
+
+      anim.start();
+
+    </script>
+  </body>
+</html>
