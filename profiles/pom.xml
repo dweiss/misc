@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.carrotsearch.lingo4g</groupId>
+    <artifactId>lingo4g-public-module</artifactId>
+    <version>0.3.0-SNAPSHOT</version>
+    <relativePath>lingo4g-public/lingo4g-public-module</relativePath>
+  </parent>
+
+  <artifactId>lingo4g</artifactId>
+  <packaging>pom</packaging>
+
+  <name>Lingo4G (Top Aggregator POM)</name>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <inherited>false</inherited>
+        <version>${version.maven-antrun-plugin}</version>
+        <executions>
+          <execution>
+            <id>generate-build-properties</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo>### ${foo.active}</echo>
+                <echo>### ${jdk-activated}</echo>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>foo</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <foo.active>true</foo.active>
+      </properties>
+    </profile> 
+
+    <profile>
+      <id>jdk-activated</id>
+      <activation>
+        <jdk>[1.6,]</jdk>
+      </activation>
+      <properties>
+        <jdk-activated>true</jdk-activated>
+      </properties>
+    </profile>
+  </profiles>  
+</project>  
