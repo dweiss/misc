@@ -5,7 +5,12 @@ const MARGIN = 2 * SCALE;
 const FONT = `${48 * SCALE}px sans-serif`;
 const TEXTS = ["Hello world", "foo", "bar", "funny thing"];
 
-function renderTextBitmap(text) {
+function randomPastel() {
+  const h = Math.random() * 360;
+  return `hsl(${h}, 80%, 75%)`;
+}
+
+function renderTextBitmap(text, color) {
   const tmp = new OffscreenCanvas(1, 1).getContext("2d");
   tmp.font = FONT;
   const metrics = tmp.measureText(text);
@@ -17,7 +22,7 @@ function renderTextBitmap(text) {
 
   const canvas = new OffscreenCanvas(w, h);
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = color;
   ctx.font = FONT;
   ctx.textBaseline = "alphabetic";
   ctx.fillText(text, MARGIN, MARGIN + metrics.actualBoundingBoxAscent);
@@ -39,7 +44,7 @@ function randomSlice() {
 
 // Pre-render all text bitmaps and assign random slice params.
 const slices = TEXTS.map((text) => ({
-  bitmap: renderTextBitmap(text),
+  bitmap: renderTextBitmap(text, randomPastel()),
   params: randomSlice(),
 }));
 
@@ -72,6 +77,7 @@ function draw() {
       outerRadius: params.outerRadius + dOuter,
       startAngle: params.startAngle + dStart,
       endAngle: params.endAngle + dEnd,
+      alpha: 0.8,
     });
   }
   renderer.flush({ debug });

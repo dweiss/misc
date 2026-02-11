@@ -17,6 +17,7 @@ const FRAGMENT_SHADER = `
   uniform float u_outerRadius;
   uniform float u_midAngle;
   uniform float u_halfSpan;
+  uniform float u_alpha;
 
   #define PI  3.14159265359
   #define TAU 6.28318530718
@@ -33,7 +34,8 @@ const FRAGMENT_SHADER = `
 
     float u = da / u_halfSpan * 0.5 + 0.5;
     float v = (r - u_innerRadius) / (u_outerRadius - u_innerRadius);
-    gl_FragColor = texture2D(u_texture, vec2(u, v));
+    vec4 texel = texture2D(u_texture, vec2(u, v));
+    gl_FragColor = vec4(texel.rgb, texel.a * u_alpha);
   }
 `;
 
@@ -132,6 +134,7 @@ export function createCircleRenderer(canvas) {
   const uOuterRadius = gl.getUniformLocation(program, "u_outerRadius");
   const uMidAngle = gl.getUniformLocation(program, "u_midAngle");
   const uHalfSpan = gl.getUniformLocation(program, "u_halfSpan");
+  const uAlpha = gl.getUniformLocation(program, "u_alpha");
 
   const wireProgram = linkProgram(gl, WIRE_VERTEX_SHADER, WIRE_FRAGMENT_SHADER);
   const wAPosition = gl.getAttribLocation(wireProgram, "a_position");
@@ -143,8 +146,8 @@ export function createCircleRenderer(canvas) {
 
   const queue = [];
 
-  function drawSlice(bitmap, { innerRadius, outerRadius, startAngle, endAngle }) {
-    queue.push({ bitmap, innerRadius, outerRadius, startAngle, endAngle });
+  function drawSlice(bitmap, { innerRadius, outerRadius, startAngle, endAngle, alpha = 1 }) {
+    queue.push({ bitmap, innerRadius, outerRadius, startAngle, endAngle, alpha });
   }
 
   function flush({ debug = false } = {}) {
@@ -156,7 +159,7 @@ export function createCircleRenderer(canvas) {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     for (const slice of queue) {
-      const { bitmap, innerRadius, outerRadius, startAngle, endAngle } = slice;
+      const { bitmap, innerRadius, outerRadius, startAngle, endAngle, alpha } = slice;
       const midAngle = (startAngle + endAngle) * 0.5;
       const halfSpan = (endAngle - startAngle) * 0.5;
 
@@ -168,6 +171,7 @@ export function createCircleRenderer(canvas) {
       gl.uniform1f(uOuterRadius, outerRadius);
       gl.uniform1f(uMidAngle, midAngle);
       gl.uniform1f(uHalfSpan, halfSpan);
+      gl.uniform1f(uAlpha, alpha);
 
       const quad = buildQuad(outerRadius);
       gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
