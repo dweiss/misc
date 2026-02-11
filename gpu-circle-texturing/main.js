@@ -1,28 +1,47 @@
 import { createCircleRenderer } from "./renderer.js";
 
-const MARGIN = 2;
-const FONT = "48px sans-serif";
-const TEXT = "Hello world";
+const SCALE = 4;
+const MARGIN = 2 * SCALE;
+const FONT = `${48 * SCALE}px sans-serif`;
+const TEXTS = ["Hello world", "foo", "bar", "funny thing"];
 
-// Measure text metrics using a temporary context.
-const tmp = new OffscreenCanvas(1, 1).getContext("2d");
-tmp.font = FONT;
-const metrics = tmp.measureText(TEXT);
+function renderTextBitmap(text) {
+  const tmp = new OffscreenCanvas(1, 1).getContext("2d");
+  tmp.font = FONT;
+  const metrics = tmp.measureText(text);
 
-const textWidth = Math.ceil(metrics.width);
-const textHeight = Math.ceil(metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
+  const w = Math.ceil(metrics.width) + MARGIN * 2;
+  const h =
+    Math.ceil(metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) +
+    MARGIN * 2;
 
-const WIDTH = textWidth + MARGIN * 2;
-const HEIGHT = textHeight + MARGIN * 2;
+  const canvas = new OffscreenCanvas(w, h);
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#fff";
+  ctx.font = FONT;
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(text, MARGIN, MARGIN + metrics.actualBoundingBoxAscent);
+  return canvas;
+}
 
-// Create an offscreen backbuffer and render text into it.
-const backbuffer = new OffscreenCanvas(WIDTH, HEIGHT);
-const ctx = backbuffer.getContext("2d");
+function randomSlice() {
+  const innerRadius = 80 + Math.random() * 200;
+  const thickness = 30 + Math.random() * 60;
+  const midAngle = Math.random() * Math.PI * 2 - Math.PI;
+  const span = 0.3 + Math.random() * 1.2;
+  return {
+    innerRadius,
+    outerRadius: innerRadius + thickness,
+    startAngle: midAngle - span / 2,
+    endAngle: midAngle + span / 2,
+  };
+}
 
-ctx.fillStyle = "#fff";
-ctx.font = FONT;
-ctx.textBaseline = "alphabetic";
-ctx.fillText(TEXT, MARGIN, MARGIN + metrics.actualBoundingBoxAscent);
+// Pre-render all text bitmaps and assign random slice params.
+const slices = TEXTS.map((text) => ({
+  bitmap: renderTextBitmap(text),
+  params: randomSlice(),
+}));
 
 // Set up the visible canvas and WebGL renderer.
 const display = document.getElementById("display");
@@ -31,39 +50,35 @@ display.height = 800;
 
 const renderer = createCircleRenderer(display);
 
-// Slider elements
-const sliders = {
-  innerRadius: document.getElementById("innerRadius"),
-  outerRadius: document.getElementById("outerRadius"),
-  startAngle: document.getElementById("startAngle"),
-  endAngle: document.getElementById("endAngle"),
-};
-
-const labels = {
-  innerRadius: document.getElementById("innerRadiusVal"),
-  outerRadius: document.getElementById("outerRadiusVal"),
-  startAngle: document.getElementById("startAngleVal"),
-  endAngle: document.getElementById("endAngleVal"),
-};
+const sliderIds = ["innerRadius", "outerRadius", "startAngle", "endAngle"];
+const sliderEls = Object.fromEntries(sliderIds.map((id) => [id, document.getElementById(id)]));
+const labelEls = Object.fromEntries(sliderIds.map((id) => [id, document.getElementById(id + "Val")]));
 
 function draw() {
-  const innerRadius = Number(sliders.innerRadius.value);
-  const outerRadius = Number(sliders.outerRadius.value);
-  const startAngle = Number(sliders.startAngle.value);
-  const endAngle = Number(sliders.endAngle.value);
+  const dInner = Number(sliderEls.innerRadius.value);
+  const dOuter = Number(sliderEls.outerRadius.value);
+  const dStart = Number(sliderEls.startAngle.value);
+  const dEnd = Number(sliderEls.endAngle.value);
 
-  labels.innerRadius.textContent = innerRadius;
-  labels.outerRadius.textContent = outerRadius;
-  labels.startAngle.textContent = startAngle.toFixed(2);
-  labels.endAngle.textContent = endAngle.toFixed(2);
+  labelEls.innerRadius.textContent = dInner;
+  labelEls.outerRadius.textContent = dOuter;
+  labelEls.startAngle.textContent = dStart.toFixed(2);
+  labelEls.endAngle.textContent = dEnd.toFixed(2);
 
   const debug = document.getElementById("wireframe").checked;
-  renderer.drawSlice(backbuffer, { innerRadius, outerRadius, startAngle, endAngle });
+  for (const { bitmap, params } of slices) {
+    renderer.drawSlice(bitmap, {
+      innerRadius: params.innerRadius + dInner,
+      outerRadius: params.outerRadius + dOuter,
+      startAngle: params.startAngle + dStart,
+      endAngle: params.endAngle + dEnd,
+    });
+  }
   renderer.flush({ debug });
 }
 
-for (const slider of Object.values(sliders)) {
-  slider.addEventListener("input", draw);
+for (const el of Object.values(sliderEls)) {
+  el.addEventListener("input", draw);
 }
 document.getElementById("wireframe").addEventListener("change", draw);
 

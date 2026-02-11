@@ -29,7 +29,7 @@
         align-items: center;
         gap: 8px;
       }
-      #controls span {
+      #controls span.name {
         min-width: 100px;
       }
       #controls input[type="range"] {
@@ -45,28 +45,28 @@
   <body>
     <div id="controls">
       <label>
-        <span>Inner radius</span>
-        <input type="range" id="innerRadius" min="0" max="380" value="200" step="1">
-        <span class="value" id="innerRadiusVal"></span>
+        <span class="name">Inner radius</span>
+        <input type="range" id="innerRadius" min="-200" max="200" value="0" step="1">
+        <span class="value" id="innerRadiusVal">0</span>
       </label>
       <label>
-        <span>Outer radius</span>
-        <input type="range" id="outerRadius" min="10" max="400" value="260" step="1">
-        <span class="value" id="outerRadiusVal"></span>
+        <span class="name">Outer radius</span>
+        <input type="range" id="outerRadius" min="-200" max="200" value="0" step="1">
+        <span class="value" id="outerRadiusVal">0</span>
       </label>
       <label>
-        <span>Start angle</span>
-        <input type="range" id="startAngle" min="-3.1416" max="3.1416" value="-0.7854" step="0.01">
-        <span class="value" id="startAngleVal"></span>
+        <span class="name">Start angle</span>
+        <input type="range" id="startAngle" min="-3.1416" max="3.1416" value="0" step="0.01">
+        <span class="value" id="startAngleVal">0.00</span>
       </label>
       <label>
-        <span>End angle</span>
-        <input type="range" id="endAngle" min="-3.1416" max="3.1416" value="0.7854" step="0.01">
-        <span class="value" id="endAngleVal"></span>
+        <span class="name">End angle</span>
+        <input type="range" id="endAngle" min="-3.1416" max="3.1416" value="0" step="0.01">
+        <span class="value" id="endAngleVal">0.00</span>
       </label>
       <label>
-        <span>Wireframe</span>
         <input type="checkbox" id="wireframe">
+        <span>Wireframe</span>
       </label>
     </div>
     <canvas id="display"></canvas>
